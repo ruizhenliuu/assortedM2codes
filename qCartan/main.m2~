@@ -1,7 +1,0 @@
-loadPackage "Polyhedra";
-
-C = (n,q) -> (  
-M = matrix table(n, n, (i,j) -> if j == i+1 then 1_R else 0_R); 
-(q+1)*id_(R^n) - M - q * transpose M
-)
-
