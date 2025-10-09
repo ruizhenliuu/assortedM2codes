@@ -1,0 +1,47 @@
+-- working with QQ to get dimension,
+R = ZZ/32003[
+  c111, c112, c113, c121, c122, c123, c131, c132, c133,
+  c211, c212, c213, c221, c222, c223, c231, c232, c233,
+  c311, c312, c313, c321, c322, c323, c331, c332, c333,
+  d1, d2, d3
+];
+
+use R;
+
+c = (i,j,k) -> value getSymbol concatenate {"c", toString i, toString j, toString k};
+
+commute = for i from 1 to 3 list for j from i+1 to 3 list (
+  for k from 1 to 3 list (c(i,j,k) - c(j,i,k))
+);
+
+Icomm = ideal flatten flatten commute;
+
+
+assoc = for i from 1 to 3 list for j from 1 to 3 list for l from 1 to 3 list (
+  for m from 1 to 3 list (
+    (sum for k from 1 to 3 list (c(i,j,k)*c(k,l,m))) -
+    (sum for k from 1 to 3 list (c(j,l,k)*c(i,k,m)))
+  )
+);
+
+Iassoc = ideal flatten flatten flatten assoc;
+
+#(flatten flatten flatten assoc) -- 81
+
+
+d = k -> value getSymbol concatenate {"d", toString k};
+
+unit = for i from 1 to 3 list for m from 1 to 3 list (
+  sum(for j from 1 to 3 list (d(j)*c(j,i,m))) - (if i==m then 1 else 0)
+);
+Iunit = ideal flatten flatten unit;
+
+I = Icomm + Iassoc + Iunit
+
+mingens I 
+
+dim (R/I) -- 9
+
+Icub = I + ideal(d1-1,d2,d3)
+
+dim (R/Icub)
