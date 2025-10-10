@@ -1,4 +1,4 @@
--- working with QQ to get dimension,
+-- working with ZZ/32003 to get dimension,
 R = ZZ/32003[
   c111, c112, c113, c121, c122, c123, c131, c132, c133,
   c211, c212, c213, c221, c222, c223, c231, c232, c233,
@@ -44,4 +44,24 @@ dim (R/I) -- 9
 
 Icub = I + ideal(d1-1,d2,d3)
 
-dim (R/Icub)
+dim (R/Icub) -- 6
+
+InormCub = Icub + ideal(c223,c323)
+
+dim (R/InormCub) -- 4 
+
+-- Use Groebner basis to find a parameterisation 
+
+gens gb InormCub
+
+-*
+The output of gens gb InormCub is 
+
+o20 = | d3 d2 d1-1 c323 c321 c313-1 c312 c311 c233 c232-c322 c231 c223 c221
+      -------------------------------------------------------------------------
+      c213 c212-1 c211 c133-1 c132 c131 c123 c122-1 c121 c113 c112 c111-1
+      -------------------------------------------------------------------------
+      c322^2-c222c332-c322c333-c331 |
+*-
+
+
