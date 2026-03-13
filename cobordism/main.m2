@@ -15,6 +15,7 @@ chernNumbers = X -> (
     apply(partitions n, p -> (toList p, deg product(toList p, i -> ck#i))))
 
 -- Iterated blowup of P^n at all coordinate subspaces of dimension 0 through m.
+-- When m = -1, this gives projective space P^n.
 -- When m = n-1, this gives the permutohedral variety.
 blowupPn = (n, m) -> (
     X := toricProjectiveSpace n;
@@ -25,3 +26,12 @@ blowupPn = (n, m) -> (
     X)
 
 permutohedralVariety = n -> blowupPn(n, n-1)
+
+-- Table of Chern numbers of blowupPn(n, m) for m = -1, ..., n-1.
+-- Rows are indexed by m, columns by partitions of n.
+chernTable = n -> (
+    parts := apply(partitions n, toList);
+    header := prepend("m", apply(parts, p -> concatenate between(",", apply(p, toString))));
+    rows := for m from -1 to n-1 list
+        prepend(toString m, apply(chernNumbers blowupPn(n, m), (p, v) -> toString v));
+    netList(prepend(header, rows), Alignment => Center, HorizontalSpace => 2))

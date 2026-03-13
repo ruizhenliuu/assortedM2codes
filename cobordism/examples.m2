@@ -9,5 +9,5 @@ chernNumbers toricProjectiveSpace 3
 
 chernNumbers hirzebruchSurface 2
 
-chernNumbers blowupPn(3, 0)
-chernNumbers blowupPn(3, 1)
+chernTable 3
+chernTable 4
