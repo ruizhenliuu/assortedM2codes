@@ -1,5 +1,8 @@
 needsPackage "NormalToricVarieties"
 
+-- Computes the Chern numbers of a smooth complete toric variety X.
+-- For a smooth toric variety, c(TX) = prod_rho (1 + D_rho).
+-- Returns a list of pairs (partition, Chern number).
 chernNumbers = X -> (
     (n, A, nR) := (dim X, intersectionRing X, #rays X);
     ck := toList fold(
@@ -11,11 +14,14 @@ chernNumbers = X -> (
                 (leadCoefficient lift(pt, ambient A)) - 1/2;
     apply(partitions n, p -> (toList p, deg product(toList p, i -> ck#i))))
 
-permutohedralVariety = n -> (
-    e := append(apply(n, i -> apply(n, j -> if i == j then 1 else 0)), apply(n, j -> -1));
-    (rys, subs) := (apply(delete({}, delete(toList(0..n), subsets toList(0..n))),
-        S -> sum(S, i -> e#i)),
-        delete({}, delete(toList(0..n), subsets toList(0..n))));
-    idx := hashTable apply(#rys, i -> rys#i => i);
-    normalToricVariety(rys, unique apply(permutations(n + 1),
-        sigma -> sort apply(n, k -> idx#(sum(sort take(sigma, k + 1), i -> e#i))))))
+-- Iterated blowup of P^n at all coordinate subspaces of dimension 0 through m.
+-- When m = n-1, this gives the permutohedral variety.
+blowupPn = (n, m) -> (
+    X := toricProjectiveSpace n;
+    ground := toList(0..n);
+    for d from 0 to min(m, n-2) do
+        for S in subsets(ground, d + 1) do
+            X = toricBlowup(sort select(ground, i -> not member(i, S)), X);
+    X)
+
+permutohedralVariety = n -> blowupPn(n, n-1)
