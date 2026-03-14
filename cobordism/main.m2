@@ -198,7 +198,7 @@ combinatorialChernNumbers = M -> (
         (p, cn))))
 
 -- Todd genus via the multiplicative sequence Q(x) = x/(1-e^{-x}).
--- Always 1 for matroid wonderful varieties.
+-- Always 1 for matroid wonderful varieties. Think plugging in O_X into usual HRR. 
 toddGenus = M -> (
     r := rank M; n := r - 1;
     if n == 0 then return 1;
@@ -225,3 +225,25 @@ chiYGenus = M -> (
     (A, flatToVar) := makeChowRing M;
     R := QQ[y];
     sum(n + 1, p -> (-1)^p * (numcols basis(p, A)) * y^p))
+
+-- Kuwata's coefficient mu_k(n) from arXiv:2510.21528 Theorem 1.1.
+-- For the permutohedral variety X_{A_n}, c_k * c_{n-k} = mu_k(n) * c_n.
+kuwataCoeff = (k, n) ->
+    (n+1)! * sum(k // 2 + 1, j -> (1/12)^j * binomial(k-j, j) * binomial(n-k-j, j))
+
+
+-- Test closed formula for Chern numbers in terms of lattice data.
+closedChernNumbers = M -> (
+    r := rank M; n := #(M.groundSet);
+    fk := for k from 1 to r-1 list #select(flats M, F -> rank(M,F) == k);
+    if r == 3 then (
+        f2 := fk#1;
+        return {({2}, 3 + f2), ({1,1}, 9 - f2)});
+    if r == 4 then (
+        f2 = fk#1; f3 := fk#2;
+        rk2 := select(flats M, F -> rank(M,F) == 2);
+        rk3 := select(flats M, F -> rank(M,F) == 3);
+        w23 := sum(rk2, F -> #select(rk3, G -> isSubset(F, G)));
+        return {({3}, 2*sum(fk) - 2*n + 4), ({2,1}, 24),
+                ({1,1,1}, 64 - 10*f2 - 8*f3 + 4*w23)});
+    matroidChernNumbers M)
