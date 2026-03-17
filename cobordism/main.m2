@@ -415,6 +415,35 @@ booleanChernNumbers = r -> (
 hookChernNumber = (n, k) ->
     (n+1)! * binomial(2*k+2, k+1) / (k+2)!
 
+-- Klyachko algebra Kly_n = QQ[varpi_1,...,varpi_n] / (varpi_i * alpha_i = 0)
+-- where alpha_i = -varpi_{i-1} + 2*varpi_i - varpi_{i+1} (Cartan matrix of A_n).
+-- Squarefree monomials form a basis; deg(varpi_1...varpi_n) = 1.
+-- Chern numbers: c_lambda = deg(e_{lambda_1}(alpha) * ... * e_{lambda_k}(alpha)).
+makeKlyachkoAlgebra = n -> (
+    w := getSymbol "w";
+    R := QQ[w_1..w_n];
+    alpha := apply(n, i -> (
+        -1 * (if i > 0 then R_(i-1) else 0_R) +
+        2 * R_i +
+        -1 * (if i < n-1 then R_(i+1) else 0_R)));
+    rels := apply(n, i -> R_i * alpha#i);
+    A := R / ideal rels;
+    alphaA := apply(alpha, a -> sub(a, A));
+    (A, alphaA))
+
+klyachkoChernNumbers = n -> (
+    if n < 1 then return {};
+    (A, alpha) := makeKlyachkoAlgebra n;
+    E := new MutableList from apply(n + 1, k -> if k == 0 then 1_A else 0_A);
+    scan(alpha, a -> scan(reverse toList(1..n), k -> E#k = E#k + a * E#(k-1)));
+    ck := toList E;
+    -- deg(varpi_1...varpi_n) = n! on the permutohedral variety
+    degOne := product(n, i -> A_i);
+    R2 := ambient A;
+    dc := leadCoefficient lift(degOne, R2);
+    deg := f -> n! * ((leadCoefficient lift(f + degOne/2, R2)) / dc - 1/2);
+    apply(partitions n, p -> (toList p, deg product(toList p, i -> ck#i))))
+
 -- All Chern numbers of the permutohedral variety via equivariant
 -- localization (Bott residue formula). For sigma in S_{n+1}, the tangent
 -- weights at the fixed point are d_i = sigma(i-1) - sigma(i).
